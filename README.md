@@ -1,35 +1,16 @@
-# letters2024
+# Письма
 
-This template should help get you started developing with Vue 3 in Vite.
+### Новый рисунок
+Рисунок для конверта подкгружается из /components/SvgImg.
+1) Взять новый рисунок и открыть его в шаблоне для нужного конверта(чтобы выставить среди снежинок).
+2) Получившийся рисунок из п.1. необходимо открыть в шаблоне SVG
+3) Создать новый js файл в SvgImg и создать export const fixeC5
+4) Поменять размеры SVG с mm на pt.
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+### Кастомные шрифты для pdf:
+1) открыть node_modules/pdfmake/
+2) создать 2 папки examples/fonts
+3) добавить туда нужные шрифты
+4) К командной строке перейти в папку node_modules/pdfmake/
+5) Выполнить команду **node build-vfs.js "./examples/fonts"**

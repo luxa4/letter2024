@@ -1,13 +1,27 @@
 <script setup>
-import { UploadFilled } from '@element-plus/icons-vue'
-import { ElUpload } from 'element-plus'
-import convertToUtf8 from '@/hepers/convertToUtf.js';
-
+import { ref } from 'vue';
+import { UploadFilled } from '@element-plus/icons-vue';
+import { ElUpload, ElIcon } from 'element-plus';
+import {
+  convertToUtf8,
+  getAddressObject,
+  getAztecCode, getDocDefinition,
+  getOrderDetails
+} from '@/hepers/additionalFunctions.js';
+import { FONTS } from '@/constants/fonts.js';
 import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
 
-const onChangeUpload = (uploadedFile) => {
-  console.log(`uploadedFile`, uploadedFile);
+// import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
 
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+
+
+// let zipLib = require('jszip-sync/dist/jszip.min.js');
+// const zip = ref(new zipLib());
+
+const onChangeUpload = (uploadedFile) => {
   const file = uploadedFile.raw;
 
   let reader = new FileReader();
@@ -15,44 +29,85 @@ const onChangeUpload = (uploadedFile) => {
   reader.onload = function(event) {
     const arrayBuffer = event.target.result;
 
-    const csvData = convertToUtf8(arrayBuffer)
+    const csvData = convertToUtf8(arrayBuffer);
 
     const rows = csvData.split('\n');
     const headers = rows[0].split(';');
 
-    console.log(`headers`, headers);
-    console.log(`rows`, rows);
-
     // Находим индекс колонки "товары"
     const productIndex = headers.indexOf('Товары');
     const addressIndex = headers.indexOf('Адрес доставки');
+    const orderIndex = headers.indexOf('Номер заказа');
 
-    if (productIndex === -1 || addressIndex === -1) {
-      alert('Колонка "Товары" или "Адрес доставки" не найдена.');
+    if (productIndex === -1 || addressIndex === -1 || orderIndex === -1) {
+      alert('Колонка "Товары" или "Адрес доставки" или "Номер зазака" не найдены.');
       return;
     }
 
-    const addresses = rows.slice(1).map(row => {
+    const orders = rows.slice(1).map(row => {
       const columns = row.split(';');
-      return columns[addressIndex];
-    }); // Убираем пустые строки
 
-    // Извлекаем все значения из колонки "товары"
-    const products = rows.slice(1).map(row => {
-      const columns = row.split(';');
-      return columns[productIndex];
-    }).filter(product => product); // Убираем пустые строки
+      const address = getAddressObject(columns[addressIndex]);
+      const details = getOrderDetails(columns[productIndex]);
+      const orderId = columns[orderIndex];
+
+      return {
+        orderId,
+        address,
+        details
+      };
+    });
 
 
-
+    createEnvelope(orders[0]);
     // Выводим результат
-    console.log(`addresses`, addresses);
-    console.log(`products`, products);
-
+    console.log('orders', orders);
   };
 
   reader.readAsArrayBuffer(file);
+};
+
+function createEnvelope(orderObject) {
+  const envelopeType = orderObject.details.envelopeType;
+  const aztecCode = getAztecCode(orderObject.orderId);
+
+  drawEnvelope(envelopeType, aztecCode, orderObject);
 }
+
+function drawEnvelope(envelopeType, aztecCode, orderObject) {
+  const parameters = ENVELOPE_PARAMS[envelopeType];
+
+  if (pdfMake.vfs == undefined) {
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  }
+
+  pdfMake.fonts = FONTS;
+
+  const docDefinition = getDocDefinition(parameters, orderObject, aztecCode);
+
+  // return pdfMake.createPdf(docDefinition);
+  pdfMake.createPdf(docDefinition).open();
+
+
+  //
+  // const worker = new Worker('worker.js',{ type: 'module' });
+  //
+  // // Обработка сообщения от worker'а
+  // worker.onmessage = function(event) {
+  //   const blob = event.data;
+  //   const url = URL.createObjectURL(blob);
+  //
+  //   // Создаем ссылку для скачивания
+  //   const downloadLink = document.getElementById('downloadLink');
+  //   downloadLink.href = url;
+  //   downloadLink.download = 'file.txt'; // Укажите имя файла
+  //   downloadLink.style.display = 'block';
+  //   downloadLink.textContent = 'Скачать файл';
+  // };
+  //
+  // worker.postMessage({ });
+}
+
 
 
 </script>
@@ -76,6 +131,7 @@ const onChangeUpload = (uploadedFile) => {
         </div>
       </template>
     </el-upload>
+    <canvas style="display: none" id="mycanvas"></canvas>
   </main>
 </template>
 
