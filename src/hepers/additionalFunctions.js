@@ -87,13 +87,13 @@ export function getAztecCode(order) {
   return aztecCanvas.toDataURL('image/png');
 }
 
-export function getDocDefinition(parameters, orderObject, aztecCode) {
+export function getDocDefinition(parameters, order, aztecCode, picture) {
   return {
     content: [
       // Picture
       {
-        // svg: this.getPicture(letter, envelope_type),
-        // margin: parameters.marginPicture
+        svg: picture,
+        margin: parameters.marginPicture
       },
       {
         text: 'От кого',
@@ -169,7 +169,7 @@ export function getDocDefinition(parameters, orderObject, aztecCode) {
       },
 
       {
-        text: orderObject.orderId.slice(-4),
+        text: order.orderId.slice(-4),
         fontSize: 10,
         color: '#323d85',
         margin: parameters.marginOrderId
@@ -187,7 +187,7 @@ export function getDocDefinition(parameters, orderObject, aztecCode) {
         margin: parameters.marginPostalPic
       },
       {
-        text: orderObject.address.postalCode,
+        text: order.address.postalCode,
         font: 'Pechkin',
         fontSize: 34,
         color: '#2b2a29',
@@ -253,25 +253,25 @@ export function getDocDefinition(parameters, orderObject, aztecCode) {
         ]
       },
       {
-        text: orderObject.details.recipient,
+        text: order.details.recipient,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginPerson
       },
       {
-        text: orderObject.address.street,
+        text: order.address.street,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginStreet
       },
       {
-        text: orderObject.address.city,
+        text: order.address.city,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginCity
       },
       {
-        text: orderObject.address.region,
+        text: order.address.region,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginRegion
@@ -285,4 +285,42 @@ export function getDocDefinition(parameters, orderObject, aztecCode) {
       font: 'Andantino'
     }
   };
+}
+
+export async function getPicture(picture, envelope_type) {
+  if (envelope_type === 'A4') {
+    if (picture.startsWith('1')) return await import('@/assets/pictures/img1A4.js');
+    if (picture.startsWith('2')) return await import('@/assets/pictures/img2A4.js');
+    if (picture.startsWith('3')) return await import('@/assets/pictures/img3A4.js');
+    if (picture.startsWith('4')) return await import('@/assets/pictures/img4A4.js');
+    if (picture.startsWith('5')) return await import('@/assets/pictures/img5A4.js');
+    if (picture.startsWith('6')) return await import('@/assets/pictures/img6A4.js');
+    if (picture.startsWith('7')) return await import('@/assets/pictures/img7A4.js');
+    if (picture.startsWith('8')) return await import('@/assets/pictures/img8A4.js');
+    if (picture.startsWith('9')) return await import('@/assets/pictures/img9A4.js');
+  }
+
+  if (envelope_type === 'A5') {
+    if (picture.startsWith('1')) return await import('@/assets/pictures/img1A5.js');
+    if (picture.startsWith('2')) return await import('@/assets/pictures/img2A5.js');
+    if (picture.startsWith('3')) return await import('@/assets/pictures/img3A5.js');
+    if (picture.startsWith('4')) return await import('@/assets/pictures/img4A5.js');
+    if (picture.startsWith('5')) return await import('@/assets/pictures/img5A5.js');
+    if (picture.startsWith('6')) return await import('@/assets/pictures/img6A5.js');
+    if (picture.startsWith('7')) return await import('@/assets/pictures/img7A5.js');
+    if (picture.startsWith('8')) return await import('@/assets/pictures/img8A5.js');
+    if (picture.startsWith('9')) return await import('@/assets/pictures/img9A5.js');
+  }
+
+  if (picture.startsWith('1')) return await import('@/assets/pictures/img1C5.js');
+  if (picture.startsWith('2')) return await import('@/assets/pictures/img2C5.js');
+  if (picture.startsWith('3')) return await import('@/assets/pictures/img3C5.js');
+  if (picture.startsWith('4')) return await import('@/assets/pictures/img4C5.js');
+  if (picture.startsWith('5')) return await import('@/assets/pictures/img5C5.js');
+  if (picture.startsWith('6')) return await import('@/assets/pictures/img6C5.js');
+  if (picture.startsWith('7')) return await import('@/assets/pictures/img7C5.js');
+  if (picture.startsWith('8')) return await import('@/assets/pictures/img8C5.js');
+  if (picture.startsWith('9')) return await import('@/assets/pictures/img9C5.js');
+
+  throw new Error('Не найдена нужная картинка на конверт!');
 }

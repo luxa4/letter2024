@@ -1,32 +1,34 @@
 <script setup>
-import { ref } from 'vue';
+import pdfFonts from '@/fonts';
+import pdfMake from 'pdfmake/build/pdfmake';
+
+
+import JSZip from 'jszip';
+
 import { UploadFilled } from '@element-plus/icons-vue';
 import { ElUpload, ElIcon } from 'element-plus';
+
 import {
   convertToUtf8,
   getAddressObject,
   getAztecCode, getDocDefinition,
-  getOrderDetails
+  getOrderDetails, getPicture
 } from '@/hepers/additionalFunctions.js';
+
 import { FONTS } from '@/constants/fonts.js';
 import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
 
-// import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
+let pdfArray = [];
+let pdfBlobs = [];
 
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+const zip = new JSZip();
 
-
-
-// let zipLib = require('jszip-sync/dist/jszip.min.js');
-// const zip = ref(new zipLib());
-
-const onChangeUpload = (uploadedFile) => {
+const onChangeUpload = async (uploadedFile) => {
   const file = uploadedFile.raw;
 
   let reader = new FileReader();
 
-  reader.onload = function(event) {
+  reader.onload = async function(event) {
     const arrayBuffer = event.target.result;
 
     const csvData = convertToUtf8(arrayBuffer);
@@ -56,59 +58,81 @@ const onChangeUpload = (uploadedFile) => {
         address,
         details
       };
-    });
+    }).filter(({ orderId }) => orderId);
 
-
-    createEnvelope(orders[0]);
-    // Выводим результат
     console.log('orders', orders);
+
+    await createEnvelope([orders[0]]);
+    await createZIP([orders[0]]);
   };
 
   reader.readAsArrayBuffer(file);
 };
 
-function createEnvelope(orderObject) {
-  const envelopeType = orderObject.details.envelopeType;
-  const aztecCode = getAztecCode(orderObject.orderId);
+async function createEnvelope(orders) {
+  if (!orders?.length) {
+    console.error('[createEnvelope] не найдено заказов');
+    return;
+  }
 
-  drawEnvelope(envelopeType, aztecCode, orderObject);
+  for (let i = 0; i < orders.length; i++) {
+    const envelopeType = orders[i].details.envelopeType;
+    const aztecCode = getAztecCode(orders[i].orderId);
+
+    // Получаем готовый конверт
+    pdfArray[i] = await drawEnvelope(envelopeType, aztecCode, orders[i]);
+
+    // Переводим в blob
+    pdfBlobs[i] = await new Promise(resolve => {
+      setTimeout(() => {
+        pdfArray[i].getBlob((blob) => {
+          resolve(blob);
+        });
+      },0);
+    });
+  }
 }
 
-function drawEnvelope(envelopeType, aztecCode, orderObject) {
+async function drawEnvelope(envelopeType, aztecCode, order) {
   const parameters = ENVELOPE_PARAMS[envelopeType];
 
   if (pdfMake.vfs == undefined) {
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+    pdfMake.vfs = pdfFonts;
   }
 
   pdfMake.fonts = FONTS;
 
-  const docDefinition = getDocDefinition(parameters, orderObject, aztecCode);
+  const picture = await getPicture(order.details.picture, parameters.pageSize);
 
-  // return pdfMake.createPdf(docDefinition);
+  const docDefinition = getDocDefinition(parameters, order, aztecCode, picture.pic);
+
+  // Раскомментировать если нужно открыть PDF
   pdfMake.createPdf(docDefinition).open();
 
-
-  //
-  // const worker = new Worker('worker.js',{ type: 'module' });
-  //
-  // // Обработка сообщения от worker'а
-  // worker.onmessage = function(event) {
-  //   const blob = event.data;
-  //   const url = URL.createObjectURL(blob);
-  //
-  //   // Создаем ссылку для скачивания
-  //   const downloadLink = document.getElementById('downloadLink');
-  //   downloadLink.href = url;
-  //   downloadLink.download = 'file.txt'; // Укажите имя файла
-  //   downloadLink.style.display = 'block';
-  //   downloadLink.textContent = 'Скачать файл';
-  // };
-  //
-  // worker.postMessage({ });
+  return pdfMake.createPdf(docDefinition);
 }
 
+function createZIP(orders) {
+  if (!orders?.length) {
+    console.error('[createZIP] не найдено заказов');
+    return;
+  }
 
+  // Добавляем конверты в ZIP
+  for (let i = 0; i < orders.length; i++) {
+    const envelopeType = orders[i].details.envelopeType;
+    const orderId = orders[i].orderId;
+
+    zip.file(`${i + 1}_${envelopeType}_${orderId}.pdf`, pdfBlobs[i]);
+  }
+
+  // Создаем ZIP
+  zip.generateAsync( { type: 'blob' } )
+    .then((blob) => {
+      // this.status = '';
+      saveAs(blob, `orders${1}.zip`);
+    });
+}
 
 </script>
 
