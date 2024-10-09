@@ -2,14 +2,14 @@
 import pdfFonts from '@/fonts';
 import pdfMake from 'pdfmake/build/pdfmake';
 
-
 import JSZip from 'jszip';
 
+import { ref, computed } from 'vue';
 import { UploadFilled } from '@element-plus/icons-vue';
-import { ElUpload, ElIcon } from 'element-plus';
+import { ElUpload, ElIcon, ElProgress } from 'element-plus';
 
 import {
-  convertToUtf8,
+  convertToUtf8, countTotalDetails,
   getAddressObject,
   getAztecCode, getDocDefinition,
   getOrderDetails, getPicture
@@ -22,6 +22,12 @@ let pdfArray = [];
 let pdfBlobs = [];
 
 const zip = new JSZip();
+
+const showProgress = ref(false);
+const readyEnvelope = ref(0);
+const ordersCount = ref(0);
+
+const percent = computed(() => Math.round(readyEnvelope.value * 100 / ordersCount.value));
 
 const onChangeUpload = async (uploadedFile) => {
   const file = uploadedFile.raw;
@@ -42,7 +48,7 @@ const onChangeUpload = async (uploadedFile) => {
     const orderIndex = headers.indexOf('Номер заказа');
 
     if (productIndex === -1 || addressIndex === -1 || orderIndex === -1) {
-      alert('Колонка "Товары" или "Адрес доставки" или "Номер зазака" не найдены.');
+      alert('Колонка "Товары" или "Адрес доставки" или "Номер заказа" не найдены.');
       return;
     }
 
@@ -62,8 +68,10 @@ const onChangeUpload = async (uploadedFile) => {
 
     console.log('orders', orders);
 
-    await createEnvelope([orders[0]]);
-    // await createZIP([orders[0]]);
+    ordersCount.value = orders.length;
+    showProgress.value = true;
+    await createEnvelope(orders);
+    await createZIP(orders);
   };
 
   reader.readAsArrayBuffer(file);
@@ -75,21 +83,38 @@ async function createEnvelope(orders) {
     return;
   }
 
+  ordersCount.value = countTotalDetails(orders);
+
   for (let i = 0; i < orders.length; i++) {
-    const envelopeType = orders[i].details.envelopeType;
     const aztecCode = getAztecCode(orders[i].orderId);
 
-    // Получаем готовый конверт
-    pdfArray[i] = await drawEnvelope(envelopeType, aztecCode, orders[i]);
+    for (let k = 0; k < orders[i].details.length; k++) {
+      const envelopeType = orders[i].details[k].envelopeType;
 
-    // Переводим в blob
-    pdfBlobs[i] = await new Promise(resolve => {
-      setTimeout(() => {
-        pdfArray[i].getBlob((blob) => {
-          resolve(blob);
-        });
-      },0);
-    });
+      const orderInfo = {
+        orderId: orders[i].orderId,
+        picture: orders[i].details[k].picture,
+        recipient: orders[i].details[k].recipient,
+        postalCode: orders[i].address.postalCode,
+        street: orders[i].address.street,
+        city: orders[i].address.city,
+        region: orders[i].address.region
+      };
+
+      // Получаем готовый конверт
+      pdfArray.push(await drawEnvelope(envelopeType, aztecCode, orderInfo));
+
+      // Переводим в blob
+      pdfBlobs.push(await new Promise(resolve => {
+        setTimeout(() => {
+          pdfArray[pdfArray.length - 1].getBlob((blob) => {
+            resolve(blob);
+          });
+        },0);
+      }));
+
+      readyEnvelope.value++;
+    }
   }
 }
 
@@ -102,14 +127,14 @@ async function drawEnvelope(envelopeType, aztecCode, order) {
 
   pdfMake.fonts = FONTS;
 
-  const picture = await getPicture(order.details.picture, parameters.pageSize);
+  const picture = await getPicture(order.picture, parameters.pageSize);
 
   const docDefinition = getDocDefinition(parameters, order, aztecCode, picture.pic);
 
   // Раскомментировать если нужно открыть PDF
-  pdfMake.createPdf(docDefinition).open();
+  // pdfMake.createPdf(docDefinition).open();
 
-  // return pdfMake.createPdf(docDefinition);
+  return pdfMake.createPdf(docDefinition);
 }
 
 function createZIP(orders) {
@@ -120,10 +145,16 @@ function createZIP(orders) {
 
   // Добавляем конверты в ZIP
   for (let i = 0; i < orders.length; i++) {
-    const envelopeType = orders[i].details.envelopeType;
     const orderId = orders[i].orderId;
+    let index = 0;
 
-    zip.file(`${i + 1}_${envelopeType}_${orderId}.pdf`, pdfBlobs[i]);
+    for (let k = 0; k < orders[i].details.length; k++) {
+      const envelopeType = orders[i].details[k].envelopeType;
+
+      zip.file(`${i + 1}_${envelopeType}_${orderId}.pdf`, pdfBlobs[index]);
+
+      index++;
+    }
   }
 
   // Создаем ZIP
@@ -155,11 +186,15 @@ function createZIP(orders) {
         </div>
       </template>
     </el-upload>
+
+    <div v-if="showProgress" class="demo-progress">
+      <el-progress type="circle" :percentage="percent"/>
+    </div>
     <canvas style="display: none" id="mycanvas"></canvas>
   </main>
 </template>
 
-<style scoped>
+<style module>
 header {
   line-height: 1.5;
 }

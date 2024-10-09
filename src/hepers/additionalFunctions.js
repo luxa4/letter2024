@@ -39,24 +39,39 @@ export function getAddressObject(address) {
   }
 }
 
-export function getOrderDetails(order) {
-  if (!order) {
+export function getOrderDetails(orderString) {
+  if (!orderString) {
     return;
   }
 
-  // Регулярное выражение для извлечения подстроки после "кому?" и до двух запятых
-  const recipientPattern = /\(кому\?\):\s*([^,]*),,\s*([^,]*),?/;
-  // Регулярное выражение для извлечения подстроки после "Рисунок на конверте:" и до двух запятых
-  const picturePattern = /Рисунок на конверте:\s*([^,]*),,\s*([^,]*),?/;
+  const regex = /\[(.*?)\]/g;
+  let matches;
+  const orders = [];
+  const details = [];
 
-  const recipientMatch = order.match(recipientPattern);
-  const pictureMatch = order.match(picturePattern);
+  // Используем цикл для извлечения всех совпадений
+  while ((matches = regex.exec(orderString)) !== null) {
+    // matches[1] содержит текст между скобками
+    orders.push(matches[1]);
+  }
 
-  const recipient = recipientMatch ? recipientMatch[1].trim() : null;
-  const picture = pictureMatch ? pictureMatch[1].trim() : null;
-  const envelopeType = getEnvelopeSize(order);
+  for (let i = 0; i < orders.length; i++) {
+    // Регулярное выражение для извлечения подстроки после "кому?" и до двух запятых
+    const recipientPattern = /\(кому\?\):\s*([^,]*),,\s*([^,]*),?/;
+    // Регулярное выражение для извлечения подстроки после "Рисунок на конверте:" и до двух запятых
+    const picturePattern = /Рисунок на конверте:\s*([^,]*),,\s*([^,]*),?/;
 
-  return { recipient, picture, envelopeType };
+    const recipientMatch = orders[i].match(recipientPattern);
+    const pictureMatch = orders[i].match(picturePattern);
+
+    const recipient = recipientMatch ? recipientMatch[1].trim() : null;
+    const picture = pictureMatch ? pictureMatch[1].trim() : null;
+    const envelopeType = getEnvelopeSize(orders[i]);
+
+    details.push({ recipient, picture, envelopeType });
+  }
+
+  return details;
 }
 
 function getEnvelopeSize(inputString) {
@@ -87,7 +102,7 @@ export function getAztecCode(order) {
   return aztecCanvas.toDataURL('image/png');
 }
 
-export function getDocDefinition(parameters, order, aztecCode, picture) {
+export function getDocDefinition(parameters, orderInfo, aztecCode, picture) {
   return {
     content: [
       // Picture
@@ -169,7 +184,7 @@ export function getDocDefinition(parameters, order, aztecCode, picture) {
       },
 
       {
-        text: order.orderId.slice(-4),
+        text: orderInfo.orderId.slice(-4),
         fontSize: 10,
         color: '#323d85',
         margin: parameters.marginOrderId
@@ -187,7 +202,7 @@ export function getDocDefinition(parameters, order, aztecCode, picture) {
         margin: parameters.marginPostalPic
       },
       {
-        text: order.address.postalCode,
+        text: orderInfo.postalCode,
         font: 'Pechkin',
         fontSize: 34,
         color: '#2b2a29',
@@ -253,25 +268,25 @@ export function getDocDefinition(parameters, order, aztecCode, picture) {
         ]
       },
       {
-        text: order.details.recipient,
+        text: orderInfo.recipient,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginPerson
       },
       {
-        text: order.address.street,
+        text: orderInfo.street,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginStreet
       },
       {
-        text: order.address.city,
+        text: orderInfo.city,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginCity
       },
       {
-        text: order.address.region,
+        text: orderInfo.region,
         fontSize: 26,
         color: '#323d85',
         margin: parameters.marginRegion
@@ -323,4 +338,17 @@ export async function getPicture(picture, envelope_type) {
   if (picture.startsWith('9')) return await import('@/assets/pictures/img9C5.js');
 
   throw new Error('Не найдена нужная картинка на конверт!');
+}
+
+export function countTotalDetails(orders) {
+  let totalCount = 0;
+
+  // Проходим по каждому заказу и суммируем количество деталей
+  orders.forEach(order => {
+    if (Array.isArray(order.details)) {
+      totalCount += order.details.length;
+    }
+  });
+
+  return totalCount;
 }
