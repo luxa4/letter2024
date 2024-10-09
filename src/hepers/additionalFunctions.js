@@ -292,10 +292,10 @@ export async function getPicture(picture, envelope_type) {
     if (picture.startsWith('1')) return await import('@/assets/pictures/img1A4.js');
     if (picture.startsWith('2')) return await import('@/assets/pictures/img2A4.js');
     if (picture.startsWith('3')) return await import('@/assets/pictures/img3A4.js');
-    if (picture.startsWith('4')) return await import('@/assets/pictures/img4A4.js');
-    if (picture.startsWith('5')) return await import('@/assets/pictures/img5A4.js');
-    if (picture.startsWith('6')) return await import('@/assets/pictures/img6A4.js');
-    if (picture.startsWith('7')) return await import('@/assets/pictures/img7A4.js');
+    if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4A4.js');
+    if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5A4.js');
+    if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5A4.js');
+    if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7A4.js');
     if (picture.startsWith('8')) return await import('@/assets/pictures/img8A4.js');
     if (picture.startsWith('9')) return await import('@/assets/pictures/img9A4.js');
   }
@@ -304,10 +304,10 @@ export async function getPicture(picture, envelope_type) {
     if (picture.startsWith('1')) return await import('@/assets/pictures/img1A5.js');
     if (picture.startsWith('2')) return await import('@/assets/pictures/img2A5.js');
     if (picture.startsWith('3')) return await import('@/assets/pictures/img3A5.js');
-    if (picture.startsWith('4')) return await import('@/assets/pictures/img4A5.js');
-    if (picture.startsWith('5')) return await import('@/assets/pictures/img5A5.js');
-    if (picture.startsWith('6')) return await import('@/assets/pictures/img6A5.js');
-    if (picture.startsWith('7')) return await import('@/assets/pictures/img7A5.js');
+    if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4A5.js');
+    if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5A5.js');
+    if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5A5.js');
+    if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7A5.js');
     if (picture.startsWith('8')) return await import('@/assets/pictures/img8A5.js');
     if (picture.startsWith('9')) return await import('@/assets/pictures/img9A5.js');
   }
@@ -315,10 +315,10 @@ export async function getPicture(picture, envelope_type) {
   if (picture.startsWith('1')) return await import('@/assets/pictures/img1C5.js');
   if (picture.startsWith('2')) return await import('@/assets/pictures/img2C5.js');
   if (picture.startsWith('3')) return await import('@/assets/pictures/img3C5.js');
-  if (picture.startsWith('4')) return await import('@/assets/pictures/img4C5.js');
-  if (picture.startsWith('5')) return await import('@/assets/pictures/img5C5.js');
-  if (picture.startsWith('6')) return await import('@/assets/pictures/img6C5.js');
-  if (picture.startsWith('7')) return await import('@/assets/pictures/img7C5.js');
+  if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4C5.js');
+  if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5C5.js');
+  if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5C5.js');
+  if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7C5.js');
   if (picture.startsWith('8')) return await import('@/assets/pictures/img8C5.js');
   if (picture.startsWith('9')) return await import('@/assets/pictures/img9C5.js');
 

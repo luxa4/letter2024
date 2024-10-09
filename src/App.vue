@@ -63,7 +63,7 @@ const onChangeUpload = async (uploadedFile) => {
     console.log('orders', orders);
 
     await createEnvelope([orders[0]]);
-    await createZIP([orders[0]]);
+    // await createZIP([orders[0]]);
   };
 
   reader.readAsArrayBuffer(file);
@@ -109,7 +109,7 @@ async function drawEnvelope(envelopeType, aztecCode, order) {
   // Раскомментировать если нужно открыть PDF
   pdfMake.createPdf(docDefinition).open();
 
-  return pdfMake.createPdf(docDefinition);
+  // return pdfMake.createPdf(docDefinition);
 }
 
 function createZIP(orders) {
