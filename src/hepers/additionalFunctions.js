@@ -77,6 +77,8 @@ export function getOrderDetails(orderString) {
 function getEnvelopeSize(inputString) {
   if (inputString.includes('Большое письмо')) {
     return 'A4';
+  } else if (inputString.includes('белой тушью')) {
+    return 'A4';
   } else if (inputString.includes('Сюжетное письмо')) {
     return 'A4';
   } else if (inputString.includes('Крафтовый конверт С5')) {

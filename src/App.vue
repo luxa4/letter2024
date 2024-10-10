@@ -4,9 +4,9 @@ import pdfMake from 'pdfmake/build/pdfmake';
 
 import JSZip from 'jszip';
 
-import { ref, computed } from 'vue';
+import { ref, computed, useTemplateRef, watch } from 'vue';
 import { UploadFilled } from '@element-plus/icons-vue';
-import { ElUpload, ElIcon, ElProgress } from 'element-plus';
+import { ElUpload, ElIcon, ElProgress, ElButton } from 'element-plus';
 
 import {
   convertToUtf8, countTotalDetails,
@@ -21,20 +21,35 @@ import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
 let pdfArray = [];
 let pdfBlobs = [];
 
+
 const zip = new JSZip();
 
+const uploader = useTemplateRef('uploader');
 const showProgress = ref(false);
 const readyEnvelope = ref(0);
+const orders = ref([]);
 const ordersCount = ref(0);
+const file = ref(null);
+const isBtnDisabled = ref(false);
+const isLoaderDisabled = ref(false);
+const currentOrder = ref(null);
 
 const percent = computed(() => Math.round(readyEnvelope.value * 100 / ordersCount.value));
 
-const onChangeUpload = async (uploadedFile) => {
-  const file = uploadedFile.raw;
+watch(file, (value) => isLoaderDisabled.value = !!value);
+
+const startProcessing = () => {
+  if (!file.value) {
+    return;
+  }
 
   let reader = new FileReader();
 
+  reader.readAsArrayBuffer(file.value);
+
   reader.onload = async function(event) {
+    isBtnDisabled.value = true;
+
     const arrayBuffer = event.target.result;
 
     const csvData = convertToUtf8(arrayBuffer);
@@ -52,7 +67,7 @@ const onChangeUpload = async (uploadedFile) => {
       return;
     }
 
-    const orders = rows.slice(1).map(row => {
+    orders.value = rows.slice(1).map(row => {
       const columns = row.split(';');
 
       const address = getAddressObject(columns[addressIndex]);
@@ -68,13 +83,22 @@ const onChangeUpload = async (uploadedFile) => {
 
     console.log('orders', orders);
 
-    ordersCount.value = orders.length;
+    ordersCount.value = orders.value.length;
     showProgress.value = true;
-    await createEnvelope(orders);
-    await createZIP(orders);
-  };
+    await createEnvelope(orders.value);
+    await createZIP(orders.value);
 
-  reader.readAsArrayBuffer(file);
+    clearLoader();
+    isBtnDisabled.value = false;
+  };
+};
+
+const onChangeUpload = async (uploadedFile) => {
+  if (file.value) {
+    clearLoader();
+  }
+
+  file.value = uploadedFile.raw;
 };
 
 async function createEnvelope(orders) {
@@ -86,6 +110,7 @@ async function createEnvelope(orders) {
   ordersCount.value = countTotalDetails(orders);
 
   for (let i = 0; i < orders.length; i++) {
+    currentOrder.value = orders[i].orderId;
     const aztecCode = getAztecCode(orders[i].orderId);
 
     for (let k = 0; k < orders[i].details.length; k++) {
@@ -165,60 +190,84 @@ function createZIP(orders) {
     });
 }
 
+const clearLoader = () => {
+  file.value = null;
+  uploader.value.clearFiles();
+  orders.value = [];
+  readyEnvelope.value = 0;
+  currentOrder.value = 0;
+};
+
 </script>
 
 <template>
-  <main>
-    <el-upload
-        class="upload-demo"
-        drag
-        :limit="1"
-        :auto-upload="false"
-        :onChange="onChangeUpload"
-    >
-      <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-      <div class="el-upload__text">
-        Перенесите файл с заказами или <em>кликните для загрузки</em>
-      </div>
-      <template #tip>
-        <div class="el-upload__tip">
-          csv файл
+  <main :class="$style.main">
+    <div :class="$style.body">
+      <el-upload
+          ref="uploader"
+          class="upload-demo"
+          drag
+          :disabled="isLoaderDisabled"
+          :limit="1"
+          :auto-upload="false"
+          :onChange="onChangeUpload"
+      >
+        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <div class="el-upload__text">
+          Перенесите файл с заказами или <em>кликните для загрузки</em>
         </div>
-      </template>
-    </el-upload>
+      </el-upload>
 
-    <div v-if="showProgress" class="demo-progress">
-      <el-progress type="circle" :percentage="percent"/>
+      <div :class="$style.btns">
+        <el-button :disabled="isBtnDisabled" type="success" round @click="startProcessing">Обработать заказы</el-button>
+        <el-button :disabled="!file || isBtnDisabled" type="warning" round @click="clearLoader">Очистить</el-button>
+      </div>
+
+      <div v-if="showProgress" :class="$style.stat">
+           <div>{{ `Найдено ${orders.length} заказ(ов), из них ${ordersCount} писем(а)` }}</div>
+           <div>{{ `Обрабатывается заказ #${currentOrder}` }}</div>
+      </div>
+
+      <div v-if="showProgress" :class="$style.progress" class="demo-progress">
+        <el-progress type="circle" :percentage="percent"/>
+      </div>
+
+      <canvas style="display: none" id="mycanvas"></canvas>
     </div>
-    <canvas style="display: none" id="mycanvas"></canvas>
   </main>
 </template>
 
 <style module>
-header {
-  line-height: 1.5;
+.main {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.btns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.stat {
+  margin-top: 25px;
+  text-align: center;
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+  div + div {
+    font-weight: 500;
   }
 }
+
+.progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
+}
+
 </style>
