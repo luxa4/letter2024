@@ -154,7 +154,7 @@ async function drawEnvelope(envelopeType, aztecCode, order) {
 
   const picture = await getPicture(order.picture, parameters.pageSize);
 
-  const docDefinition = getDocDefinition(parameters, order, aztecCode, picture.pic);
+  const docDefinition = getDocDefinition(parameters, order, aztecCode, picture);
 
   // Раскомментировать если нужно открыть PDF
   // pdfMake.createPdf(docDefinition).open();

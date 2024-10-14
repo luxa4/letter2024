@@ -306,38 +306,38 @@ export function getDocDefinition(parameters, orderInfo, aztecCode, picture) {
 
 export async function getPicture(picture, envelope_type) {
   if (envelope_type === 'A4') {
-    if (picture.startsWith('1')) return await import('@/assets/pictures/img1A4.js');
-    if (picture.startsWith('2')) return await import('@/assets/pictures/img2A4.js');
-    if (picture.startsWith('3')) return await import('@/assets/pictures/img3A4.js');
-    if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4A4.js');
-    if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5A4.js');
-    if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5A4.js');
-    if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7A4.js');
-    if (picture.startsWith('8')) return await import('@/assets/pictures/img8A4.js');
-    if (picture.startsWith('9')) return await import('@/assets/pictures/img9A4.js');
+    if (picture.startsWith('1')) return await fetch('/svg/A4/clockA4.svg').then(async res => await res.text());
+    if (picture.startsWith('2')) return await fetch('/svg/A4/mouseA4.svg').then(async res => await res.text());
+    if (picture.startsWith('3')) return await fetch('/svg/A4/carA4.svg').then(async res => await  res.text());
+    if (picture.startsWith('4')) return await fetch('/svg/A4/tigrA4.svg').then(async res => await res.text());
+    if (picture.startsWith('5')) return await fetch('/svg/A4/snakeA4.svg').then(async res => await res.text());
+    if (picture.startsWith('6')) return await fetch('/svg/A4/zayacA4.svg').then(async res => await res.text());
+    if (picture.startsWith('7')) return await fetch('/svg/A4/grandA4.svg').then(async res => await res.text());
+    if (picture.startsWith('8')) return await fetch('/svg/A4/writeLetterA4.svg').then(async res => await res.text());
+    if (picture.startsWith('9')) return await fetch('/svg/A4/troykaA4.svg').then(async res => await res.text());
   }
 
   if (envelope_type === 'A5') {
-    if (picture.startsWith('1')) return await import('@/assets/pictures/img1A5.js');
-    if (picture.startsWith('2')) return await import('@/assets/pictures/img2A5.js');
-    if (picture.startsWith('3')) return await import('@/assets/pictures/img3A5.js');
-    if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4A5.js');
-    if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5A5.js');
-    if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5A5.js');
-    if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7A5.js');
-    if (picture.startsWith('8')) return await import('@/assets/pictures/img8A5.js');
-    if (picture.startsWith('9')) return await import('@/assets/pictures/img9A5.js');
+    if (picture.startsWith('1')) return await fetch('/svg/A5/clockA5.svg').then(async res => await res.text());
+    if (picture.startsWith('2')) return await fetch('/svg/A5/mouseA5.svg').then(async res => await res.text());
+    if (picture.startsWith('3')) return await fetch('/svg/A5/carA5.svg').then(async res => await res.text());
+    if (picture.startsWith('4')) return await fetch('/svg/A5/tigrA5.svg').then(async res => await res.text());
+    if (picture.startsWith('5')) return await fetch('/svg/A5/snakeA45svg').then(async res => await res.text());
+    if (picture.startsWith('6')) return await fetch('/svg/A5/zayacA5.svg').then(async res => await res.text());
+    if (picture.startsWith('7')) return await fetch('/svg/A5/grandA5.svg').then(async res => await res.text());
+    if (picture.startsWith('8')) return await fetch('/svg/A5/writeLetterA5.svg').then(async res => await res.text());
+    if (picture.startsWith('9')) return await fetch('/svg/A5/troykaA5.svg').then(async res => await res.text());
   }
 
-  if (picture.startsWith('1')) return await import('@/assets/pictures/img1C5.js');
-  if (picture.startsWith('2')) return await import('@/assets/pictures/img2C5.js');
-  if (picture.startsWith('3')) return await import('@/assets/pictures/img3C5.js');
-  if (picture.startsWith('4')) return await import('@/assets/pictures/img23-4C5.js');
-  if (picture.startsWith('5')) return await import('@/assets/pictures/img25-5C5.js');
-  if (picture.startsWith('6')) return await import('@/assets/pictures/img23-5C5.js');
-  if (picture.startsWith('7')) return await import('@/assets/pictures/img25-7C5.js');
-  if (picture.startsWith('8')) return await import('@/assets/pictures/img8C5.js');
-  if (picture.startsWith('9')) return await import('@/assets/pictures/img9C5.js');
+  if (picture.startsWith('1')) return await fetch('/svg/C5/clockC5.svg').then(async res => await res.text());
+  if (picture.startsWith('2')) return await fetch('/svg/C5/mouseC5.svg').then(async res => await res.text());
+  if (picture.startsWith('3')) return await fetch('/svg/C5/carC5.svg').then(async res => await res.text());
+  if (picture.startsWith('4')) return await fetch('/svg/C5/tigrC5.svg').then(async res => await res.text());
+  if (picture.startsWith('5')) return await fetch('/svg/C5/snakeC5.svg').then(async res => await res.text());
+  if (picture.startsWith('6')) return await fetch('/svg/C5/zayacC5.svg').then(async res => await res.text());
+  if (picture.startsWith('7')) return await fetch('/svg/C5/grandC5.svg').then(async res => await res.text());
+  if (picture.startsWith('8')) return await fetch('/svg/C5/writeLetterC5.svg').then(async res => await res.text());
+  if (picture.startsWith('9')) return await fetch('/svg/C5/troykaC5.svg').then(async res => await res.text());
 
   throw new Error('Не найдена нужная картинка на конверт!');
 }
@@ -354,3 +354,5 @@ export function countTotalDetails(orders) {
 
   return totalCount;
 }
+
+
