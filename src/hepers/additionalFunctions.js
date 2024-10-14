@@ -1,5 +1,11 @@
 import bwipjs from 'bwip-js';
 
+const picArray = {
+  A4: [],
+  A5: [],
+  C5: []
+};
+
 export function convertToUtf8(arrayBuffer) {
 // Декодируем содержимое файла
   const decoder = new TextDecoder('windows-1251'); // Исходная кодировка
@@ -305,41 +311,56 @@ export function getDocDefinition(parameters, orderInfo, aztecCode, picture) {
 }
 
 export async function getPicture(picture, envelope_type) {
+
+  if (picArray[envelope_type][picture[0]]) {
+    return picArray[envelope_type][picture[0]];
+  }
+
+  let url;
+
   if (envelope_type === 'A4') {
-    if (picture.startsWith('1')) return await fetch('/svg/A4/clockA4.svg').then(async res => await res.text());
-    if (picture.startsWith('2')) return await fetch('/svg/A4/mouseA4.svg').then(async res => await res.text());
-    if (picture.startsWith('3')) return await fetch('/svg/A4/carA4.svg').then(async res => await  res.text());
-    if (picture.startsWith('4')) return await fetch('/svg/A4/tigrA4.svg').then(async res => await res.text());
-    if (picture.startsWith('5')) return await fetch('/svg/A4/snakeA4.svg').then(async res => await res.text());
-    if (picture.startsWith('6')) return await fetch('/svg/A4/zayacA4.svg').then(async res => await res.text());
-    if (picture.startsWith('7')) return await fetch('/svg/A4/grandA4.svg').then(async res => await res.text());
-    if (picture.startsWith('8')) return await fetch('/svg/A4/writeLetterA4.svg').then(async res => await res.text());
-    if (picture.startsWith('9')) return await fetch('/svg/A4/troykaA4.svg').then(async res => await res.text());
+    if (picture.startsWith('1')) url = '/svg/A4/clockA4.svg';
+    if (picture.startsWith('2')) url = '/svg/A4/mouseA4.svg';
+    if (picture.startsWith('3')) url = '/svg/A4/carA4.svg';
+    if (picture.startsWith('4')) url = '/svg/A4/tigrA4.svg';
+    if (picture.startsWith('5')) url = '/svg/A4/snakeA4.svg';
+    if (picture.startsWith('6')) url = '/svg/A4/zayacA4.svg';
+    if (picture.startsWith('7')) url = '/svg/A4/grandA4.svg';
+    if (picture.startsWith('8')) url = '/svg/A4/writeLetterA4.svg';
+    if (picture.startsWith('9')) url = '/svg/A4/troykaA4.svg';
   }
 
   if (envelope_type === 'A5') {
-    if (picture.startsWith('1')) return await fetch('/svg/A5/clockA5.svg').then(async res => await res.text());
-    if (picture.startsWith('2')) return await fetch('/svg/A5/mouseA5.svg').then(async res => await res.text());
-    if (picture.startsWith('3')) return await fetch('/svg/A5/carA5.svg').then(async res => await res.text());
-    if (picture.startsWith('4')) return await fetch('/svg/A5/tigrA5.svg').then(async res => await res.text());
-    if (picture.startsWith('5')) return await fetch('/svg/A5/snakeA45svg').then(async res => await res.text());
-    if (picture.startsWith('6')) return await fetch('/svg/A5/zayacA5.svg').then(async res => await res.text());
-    if (picture.startsWith('7')) return await fetch('/svg/A5/grandA5.svg').then(async res => await res.text());
-    if (picture.startsWith('8')) return await fetch('/svg/A5/writeLetterA5.svg').then(async res => await res.text());
-    if (picture.startsWith('9')) return await fetch('/svg/A5/troykaA5.svg').then(async res => await res.text());
+    if (picture.startsWith('1')) url ='/svg/A5/clockA5.svg';
+    if (picture.startsWith('2')) url ='/svg/A5/mouseA5.svg';
+    if (picture.startsWith('3')) url ='/svg/A5/carA5.svg';
+    if (picture.startsWith('4')) url ='/svg/A5/tigrA5.svg';
+    if (picture.startsWith('5')) url ='/svg/A5/snakeA45svg';
+    if (picture.startsWith('6')) url ='/svg/A5/zayacA5.svg';
+    if (picture.startsWith('7')) url ='/svg/A5/grandA5.svg';
+    if (picture.startsWith('8')) url ='/svg/A5/writeLetterA5.svg';
+    if (picture.startsWith('9')) url ='/svg/A5/troykaA5.svg';
   }
 
-  if (picture.startsWith('1')) return await fetch('/svg/C5/clockC5.svg').then(async res => await res.text());
-  if (picture.startsWith('2')) return await fetch('/svg/C5/mouseC5.svg').then(async res => await res.text());
-  if (picture.startsWith('3')) return await fetch('/svg/C5/carC5.svg').then(async res => await res.text());
-  if (picture.startsWith('4')) return await fetch('/svg/C5/tigrC5.svg').then(async res => await res.text());
-  if (picture.startsWith('5')) return await fetch('/svg/C5/snakeC5.svg').then(async res => await res.text());
-  if (picture.startsWith('6')) return await fetch('/svg/C5/zayacC5.svg').then(async res => await res.text());
-  if (picture.startsWith('7')) return await fetch('/svg/C5/grandC5.svg').then(async res => await res.text());
-  if (picture.startsWith('8')) return await fetch('/svg/C5/writeLetterC5.svg').then(async res => await res.text());
-  if (picture.startsWith('9')) return await fetch('/svg/C5/troykaC5.svg').then(async res => await res.text());
+  if (envelope_type === 'C5') {
+    if (picture.startsWith('1')) url = '/svg/C5/clockC5.svg';
+    if (picture.startsWith('2')) url = '/svg/C5/mouseC5.svg';
+    if (picture.startsWith('3')) url = '/svg/C5/carC5.svg';
+    if (picture.startsWith('4')) url = '/svg/C5/tigrC5.svg';
+    if (picture.startsWith('5')) url = '/svg/C5/snakeC5.svg';
+    if (picture.startsWith('6')) url = '/svg/C5/zayacC5.svg';
+    if (picture.startsWith('7')) url = '/svg/C5/grandC5.svg';
+    if (picture.startsWith('8')) url = '/svg/C5/writeLetterC5.svg';
+    if (picture.startsWith('9')) url = '/svg/C5/troykaC5.svg';
+  }
 
-  throw new Error('Не найдена нужная картинка на конверт!');
+  return await fetch(url).then(async res => {
+    const pic = await res.text();
+
+    picArray[envelope_type][picture[0]] = pic;
+
+    return pic;
+  });
 }
 
 export function countTotalDetails(orders) {

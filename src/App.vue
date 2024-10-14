@@ -193,7 +193,7 @@ function createZIP(orders) {
 const clearLoader = () => {
   file.value = null;
   uploader.value.clearFiles();
-  orders.value = [];
+  // orders.value = [];
   readyEnvelope.value = 0;
   currentOrder.value = 0;
 };
@@ -225,7 +225,7 @@ const clearLoader = () => {
 
       <div v-if="showProgress" :class="$style.stat">
            <div>{{ `Найдено ${orders.length} заказ(ов), из них ${ordersCount} писем(а)` }}</div>
-           <div>{{ `Обрабатывается заказ #${currentOrder}` }}</div>
+           <div v-if="currentOrder">{{ `Обрабатывается заказ #${currentOrder}` }}</div>
       </div>
 
       <div v-if="showProgress" :class="$style.progress" class="demo-progress">
