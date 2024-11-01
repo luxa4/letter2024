@@ -1,4 +1,4 @@
-import bwipjs from 'bwip-js';
+// import bwipjs from 'bwip-js';
 
 const picArray = {
   A4: [],
@@ -96,21 +96,21 @@ function getEnvelopeSize(inputString) {
   }
 }
 
-export function getAztecCode(order) {
-  let aztecCanvas = bwipjs.toCanvas('mycanvas', {
-    bcid:        'azteccode',
-    text:        `ORDER-${order}`,
-    scale:       1,
-    width:       14,
-    height:      14,
-    includetext: false,
-    textxalign:  'center'
-  });
+// export function getAztecCode(order) {
+//   let aztecCanvas = bwipjs.toCanvas('mycanvas', {
+//     bcid:        'azteccode',
+//     text:        `ORDER-${order}`,
+//     scale:       1,
+//     width:       14,
+//     height:      14,
+//     includetext: false,
+//     textxalign:  'center'
+//   });
+//
+//   return aztecCanvas.toDataURL('image/png');
+// }
 
-  return aztecCanvas.toDataURL('image/png');
-}
-
-export function getDocDefinition(parameters, orderInfo, aztecCode, picture) {
+export function getDocDefinition(parameters, orderInfo, picture) {
   return {
     content: [
       // Picture
@@ -216,10 +216,10 @@ export function getDocDefinition(parameters, orderInfo, aztecCode, picture) {
         color: '#2b2a29',
         margin: parameters.marginPostal
       },
-      {
-        image: aztecCode,
-        margin: parameters.marginAztec
-      },
+      // {
+      //   image: aztecCode,
+      //   margin: parameters.marginAztec
+      // },
       {
         text: 'Кому',
         italics: true,

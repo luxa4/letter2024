@@ -11,8 +11,10 @@ import { ElUpload, ElIcon, ElProgress, ElButton } from 'element-plus';
 import {
   convertToUtf8, countTotalDetails,
   getAddressObject,
-  getAztecCode, getDocDefinition,
-  getOrderDetails, getPicture
+  // getAztecCode,
+  getDocDefinition,
+  getOrderDetails,
+  getPicture
 } from '@/hepers/additionalFunctions.js';
 
 import { FONTS } from '@/constants/fonts.js';
@@ -111,7 +113,7 @@ async function createEnvelope(orders) {
 
   for (let i = 0; i < orders.length; i++) {
     currentOrder.value = orders[i].orderId;
-    const aztecCode = getAztecCode(orders[i].orderId);
+    // const aztecCode = getAztecCode(orders[i].orderId);
 
     for (let k = 0; k < orders[i].details.length; k++) {
       const envelopeType = orders[i].details[k].envelopeType;
@@ -127,7 +129,7 @@ async function createEnvelope(orders) {
       };
 
       // Получаем готовый конверт
-      pdfArray.push(await drawEnvelope(envelopeType, aztecCode, orderInfo));
+      pdfArray.push(await drawEnvelope(envelopeType, orderInfo));
 
       // Переводим в blob
       pdfBlobs.push(await new Promise(resolve => {
@@ -143,7 +145,7 @@ async function createEnvelope(orders) {
   }
 }
 
-async function drawEnvelope(envelopeType, aztecCode, order) {
+async function drawEnvelope(envelopeType, order) {
   const parameters = ENVELOPE_PARAMS[envelopeType];
 
   if (pdfMake.vfs == undefined) {
@@ -154,7 +156,7 @@ async function drawEnvelope(envelopeType, aztecCode, order) {
 
   const picture = await getPicture(order.picture, parameters.pageSize);
 
-  const docDefinition = getDocDefinition(parameters, order, aztecCode, picture);
+  const docDefinition = getDocDefinition(parameters, order, picture);
 
   // Раскомментировать если нужно открыть PDF
   // pdfMake.createPdf(docDefinition).open();
