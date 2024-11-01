@@ -247,6 +247,7 @@ const clearLoader = () => {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  background-color: #fff;
 }
 
 .btns {
@@ -259,6 +260,7 @@ const clearLoader = () => {
 .stat {
   margin-top: 25px;
   text-align: center;
+  color: var(--el-text-color-regular);
 
   div + div {
     font-weight: 500;
