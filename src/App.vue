@@ -3,6 +3,7 @@ import pdfFonts from '@/fonts';
 import pdfMake from 'pdfmake/build/pdfmake';
 
 import JSZip from 'jszip';
+import Papa from 'papaparse';
 
 import { ref, computed, useTemplateRef, watch } from 'vue';
 import { UploadFilled } from '@element-plus/icons-vue';
@@ -20,8 +21,7 @@ import {
 import { FONTS } from '@/constants/fonts.js';
 import { ENVELOPE_PARAMS } from '@/constants/envelopeParams.js';
 
-let pdfArray = [];
-let pdfBlobs = [];
+let pdfBlobs = {};
 
 
 const zip = new JSZip();
@@ -35,6 +35,7 @@ const file = ref(null);
 const isBtnDisabled = ref(false);
 const isLoaderDisabled = ref(false);
 const currentOrder = ref(null);
+const data = ref([]);
 
 const percent = computed(() => Math.round(readyEnvelope.value * 100 / ordersCount.value));
 
@@ -56,8 +57,21 @@ const startProcessing = () => {
 
     const csvData = convertToUtf8(arrayBuffer);
 
-    const rows = csvData.split('\n');
-    const headers = rows[0].split(';');
+
+    Papa.parse(csvData, {
+      complete: (results) => {
+        // Выводим результат
+        data.value = results.data.filter(i => {
+          const isEmpty = i.length <= 1;
+          const hasEnvelope = i[10] && !i[10]?.includes('Внешний конверт');
+
+          return !isEmpty && hasEnvelope;
+        });
+      },
+      header: false
+    });
+
+    const headers = data.value[0];
 
     // Находим индекс колонки "товары"
     const productIndex = headers.indexOf('Товары');
@@ -69,8 +83,8 @@ const startProcessing = () => {
       return;
     }
 
-    orders.value = rows.slice(1).map(row => {
-      const columns = row.split(';');
+    orders.value = data.value.slice(1).map(row => {
+      const columns = row;
 
       const address = getAddressObject(columns[addressIndex]);
       const details = getOrderDetails(columns[productIndex]);
@@ -82,8 +96,6 @@ const startProcessing = () => {
         details
       };
     }).filter(({ orderId }) => orderId);
-
-    console.log('orders', orders);
 
     ordersCount.value = orders.value.length;
     showProgress.value = true;
@@ -129,16 +141,22 @@ async function createEnvelope(orders) {
       };
 
       // Получаем готовый конверт
-      pdfArray.push(await drawEnvelope(envelopeType, orderInfo));
+      const envelope = await drawEnvelope(envelopeType, orderInfo);
 
-      // Переводим в blob
-      pdfBlobs.push(await new Promise(resolve => {
+      const blobFile = await new Promise(resolve => {
         setTimeout(() => {
-          pdfArray[pdfArray.length - 1].getBlob((blob) => {
+          envelope.getBlob((blob) => {
             resolve(blob);
           });
         },0);
-      }));
+      });
+
+      // Переводим в blob
+      if (pdfBlobs[i]) {
+        pdfBlobs[i].push(blobFile);
+      } else {
+        pdfBlobs[i] = [blobFile];
+      }
 
       readyEnvelope.value++;
     }
@@ -173,14 +191,11 @@ function createZIP(orders) {
   // Добавляем конверты в ZIP
   for (let i = 0; i < orders.length; i++) {
     const orderId = orders[i].orderId;
-    let index = 0;
 
     for (let k = 0; k < orders[i].details.length; k++) {
       const envelopeType = orders[i].details[k].envelopeType;
 
-      zip.file(`${i + 1}_${envelopeType}_${orderId}.pdf`, pdfBlobs[index]);
-
-      index++;
+      zip.file(`${i + 1}_${envelopeType}_${orderId}_${k}.pdf`, pdfBlobs[i][k]);
     }
   }
 
