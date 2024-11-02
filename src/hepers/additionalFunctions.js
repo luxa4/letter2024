@@ -83,15 +83,19 @@ export function getOrderDetails(orderString) {
 function getEnvelopeSize(inputString) {
   if (inputString.includes('Большое письмо')) {
     return 'A4';
+  } else if (inputString.includes('Конверт с белым листом A4')) {
+    return 'A4';
   } else if (inputString.includes('белой тушью')) {
     return 'A4';
   } else if (inputString.includes('Сюжетное письмо')) {
     return 'A4';
   } else if (inputString.includes('Крафтовый конверт С5')) {
     return 'C5';
-  } else if (inputString.includes('Конверт с белым листом С5')) {
+  } else if (inputString.includes('Классическое именное письмо')) {
     return 'C5';
-  }else {
+  } else if (inputString.includes('Конверт с белым листом С5')) {
+    return 'A5';
+  } else {
     return null; // Если ни одна подстрока не найдена
   }
 }
@@ -317,42 +321,30 @@ export async function getPicture(picture, envelope_type) {
   }
 
   let url;
+  let type;
 
-  if (envelope_type === 'A4') {
-    if (picture.startsWith('1')) url = '/svg/A4/clockA4.svg';
-    if (picture.startsWith('2')) url = '/svg/A4/mouseA4.svg';
-    if (picture.startsWith('3')) url = '/svg/A4/carA4.svg';
-    if (picture.startsWith('4')) url = '/svg/A4/tigrA4.svg';
-    if (picture.startsWith('5')) url = '/svg/A4/snakeA4.svg';
-    if (picture.startsWith('6')) url = '/svg/A4/zayacA4.svg';
-    if (picture.startsWith('7')) url = '/svg/A4/grandA4.svg';
-    if (picture.startsWith('8')) url = '/svg/A4/writeLetterA4.svg';
-    if (picture.startsWith('9')) url = '/svg/A4/troykaA4.svg';
+  switch (envelope_type) {
+  case 'A4':
+    type = 'A4';
+    break;
+  case 'A5':
+    type = 'A5';
+    break;
+  case 'C5':
+    type = 'C5';
+    break;
   }
 
-  if (envelope_type === 'A5') {
-    if (picture.startsWith('1')) url ='/svg/A5/clockA5.svg';
-    if (picture.startsWith('2')) url ='/svg/A5/mouseA5.svg';
-    if (picture.startsWith('3')) url ='/svg/A5/carA5.svg';
-    if (picture.startsWith('4')) url ='/svg/A5/tigrA5.svg';
-    if (picture.startsWith('5')) url ='/svg/A5/snakeA45svg';
-    if (picture.startsWith('6')) url ='/svg/A5/zayacA5.svg';
-    if (picture.startsWith('7')) url ='/svg/A5/grandA5.svg';
-    if (picture.startsWith('8')) url ='/svg/A5/writeLetterA5.svg';
-    if (picture.startsWith('9')) url ='/svg/A5/troykaA5.svg';
-  }
+  if (picture.startsWith('1')) url = `/svg/${type}/clock${type}.svg`;
+  if (picture.startsWith('2')) url = `/svg/${type}/mouse${type}.svg`;
+  if (picture.startsWith('3')) url = `/svg/${type}/car${type}.svg`;
+  if (picture.startsWith('4')) url = `/svg/${type}/tigr${type}.svg`;
+  if (picture.startsWith('5')) url = `/svg/${type}/snake${type}.svg`;
+  if (picture.startsWith('6')) url = `/svg/${type}/zayac${type}.svg`;
+  if (picture.startsWith('7')) url = `/svg/${type}/grand${type}.svg`;
+  if (picture.startsWith('8')) url = `/svg/${type}/writeLetter${type}.svg`;
+  if (picture.startsWith('9')) url = `/svg/${type}/troyka${type}.svg`;
 
-  if (envelope_type === 'C5') {
-    if (picture.startsWith('1')) url = '/svg/C5/clockC5.svg';
-    if (picture.startsWith('2')) url = '/svg/C5/mouseC5.svg';
-    if (picture.startsWith('3')) url = '/svg/C5/carC5.svg';
-    if (picture.startsWith('4')) url = '/svg/C5/tigrC5.svg';
-    if (picture.startsWith('5')) url = '/svg/C5/snakeC5.svg';
-    if (picture.startsWith('6')) url = '/svg/C5/zayacC5.svg';
-    if (picture.startsWith('7')) url = '/svg/C5/grandC5.svg';
-    if (picture.startsWith('8')) url = '/svg/C5/writeLetterC5.svg';
-    if (picture.startsWith('9')) url = '/svg/C5/troykaC5.svg';
-  }
 
   return await fetch(url).then(async res => {
     const pic = await res.text();
