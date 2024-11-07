@@ -91,9 +91,21 @@ function getEnvelopeSize(inputString) {
     return 'A4';
   } else if (inputString.includes('Крафтовый конверт С5')) {
     return 'C5';
+  } else if (inputString.includes('Рукописное письмо от Деда Мороза чернилами с сургучной печатью')) {
+    return 'C5';
+  } else if (inputString.includes('Классическое именное письмо') && inputString.includes('Крафтовый конверт')) {
+    return 'C5';
+  } else if (inputString.includes('Классическое именное письмо') && inputString.includes('Конверт с белым листом')) {
+    return 'A5';
   } else if (inputString.includes('Классическое именное письмо')) {
     return 'C5';
-  } else if (inputString.includes('Конверт с белым листом С5')) {
+  } else if (inputString.includes('Письмо от Деда Мороза') && inputString.includes('Крафтовый конверт')) {
+    return 'C5';
+  } else if (inputString.includes('Письмо от Деда Мороза') && inputString.includes('Конверт с белым листом')) {
+    return 'A5';
+  } else if (inputString.includes('Письмо от Деда Мороза')) {
+    return 'C5';
+  } else if (inputString.includes('Конверт с белым листом')) {
     return 'A5';
   } else {
     return null; // Если ни одна подстрока не найдена
