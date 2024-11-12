@@ -19,7 +19,7 @@ export function convertToUtf8(arrayBuffer) {
   return  new TextDecoder('utf-8').decode(utf8Array);
 }
 
-export function getAddressObject(address) {
+export function getAddressObject(address, orderId) {
   if (!address) {
     return;
   }
@@ -41,11 +41,11 @@ export function getAddressObject(address) {
       street
     };
   } else {
-    console.error(`Не удалось извлечь данные из адреса ${address}.`);
+    throw Error(`Не удалось извлечь данные из адреса, заказ ${orderId}`);
   }
 }
 
-export function getOrderDetails(orderString) {
+export function getOrderDetails(orderString, orderId) {
   if (!orderString) {
     return;
   }
@@ -59,6 +59,10 @@ export function getOrderDetails(orderString) {
   while ((matches = regex.exec(orderString)) !== null) {
     // matches[1] содержит текст между скобками
     orders.push(matches[1]);
+  }
+
+  if (!orders.length) {
+    throw Error(`Не найдено деталей в заказе ${orderId}`);
   }
 
   for (let i = 0; i < orders.length; i++) {

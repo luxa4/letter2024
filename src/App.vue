@@ -36,6 +36,7 @@ const isBtnDisabled = ref(false);
 const isLoaderDisabled = ref(false);
 const currentOrder = ref(null);
 const data = ref([]);
+const errors = ref([]);
 
 const percent = computed(() => Math.round(readyEnvelope.value * 100 / ordersCount.value));
 
@@ -83,19 +84,26 @@ const startProcessing = () => {
       return;
     }
 
-    orders.value = data.value.slice(1).map(row => {
+    orders.value = data.value.slice(1).reduce((acc, row) => {
       const columns = row;
 
-      const address = getAddressObject(columns[addressIndex]);
-      const details = getOrderDetails(columns[productIndex]);
-      const orderId = columns[orderIndex];
+      try {
+        const orderId = columns[orderIndex];
+        const address = getAddressObject(columns[addressIndex], orderId);
+        const details = getOrderDetails(columns[productIndex], orderId);
 
-      return {
-        orderId,
-        address,
-        details
-      };
-    }).filter(({ orderId }) => orderId);
+        acc.push({
+          orderId,
+          address,
+          details
+        });
+      } catch (error) {
+        errors.value.push(error);
+        console.error(error);
+      }
+
+      return acc;
+    }, []);
 
     ordersCount.value = orders.value.length;
     showProgress.value = true;
@@ -249,6 +257,13 @@ const clearLoader = () => {
         <el-progress type="circle" :percentage="percent"/>
       </div>
 
+      <div v-if="errors.length" :class="$style.errors">
+        <div :class="$style.label">НЕОБРАБОТАННЫЕ ЗАКАЗЫ</div>
+        <div v-for="(item, id) in errors">
+          {{ id + 1 }}. {{ item }}
+        </div>
+      </div>
+
       <canvas style="display: none" id="mycanvas"></canvas>
     </div>
   </main>
@@ -263,6 +278,10 @@ const clearLoader = () => {
   align-items: center;
   flex-wrap: wrap;
   background-color: #fff;
+}
+
+.body {
+  width: 450px;
 }
 
 .btns {
@@ -287,6 +306,19 @@ const clearLoader = () => {
   justify-content: center;
   align-items: center;
   margin-top: 25px;
+}
+
+.errors {
+  margin-top: 25px;
+  width: 100%;
+  color: #c45656;
+  word-break: break-word;
+}
+
+.label {
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 500;
 }
 
 </style>
