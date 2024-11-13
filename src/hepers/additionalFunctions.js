@@ -50,7 +50,7 @@ export function getOrderDetails(orderString, orderId) {
     return;
   }
 
-  const regex = /\[(.*?)\]/g;
+  const regex = /\[(.*?)\]/gs;
   let matches;
   const orders = [];
   const details = [];
