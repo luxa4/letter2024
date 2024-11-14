@@ -203,7 +203,7 @@ function createZIP(orders) {
     for (let k = 0; k < orders[i].details.length; k++) {
       const envelopeType = orders[i].details[k].envelopeType;
 
-      zip.file(`${i + 1}_${envelopeType}_${orderId}_${k}.pdf`, pdfBlobs[i][k]);
+      zip.file(`${orderId}_${k}_${envelopeType}_${i + 1}.pdf`, pdfBlobs[i][k]);
     }
   }
 
